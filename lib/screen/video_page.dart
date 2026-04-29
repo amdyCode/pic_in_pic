@@ -4,12 +4,15 @@ import 'package:video_player/video_player.dart';
 
 import '../widgets/hud.dart';
 import '../widgets/video_action_button.dart';
+import '../widgets/video_details.dart';
+import '../widgets/recommendation_card.dart';
+import '../widgets/description_bottom_sheet.dart';
 
 class VideoScreen extends StatefulWidget {
   const VideoScreen({super.key});
 
   @override
-  _VideoScreenState createState() => _VideoScreenState();
+  State<VideoScreen> createState() => _VideoScreenState();
 }
 
 class _VideoScreenState extends State<VideoScreen> {
@@ -24,7 +27,6 @@ class _VideoScreenState extends State<VideoScreen> {
   late VideoPlayerController _videoController;
 
   // Constants
-  static const double _minimizedHeightFactor = 0.7;
   static const double _appPadding = 20.0;
 
   @override
@@ -105,6 +107,27 @@ class _VideoScreenState extends State<VideoScreen> {
     });
   }
 
+  void _showDescriptionBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (_, controller) => const DescriptionBottomSheet(
+          title: "Le Footballeur Qui A Mis Fin À La Guerre Dans Son Pays",
+          likes: "1,5 k",
+          views: "56 983",
+          date: "21 sept. 2025",
+          description:
+              "Il a marqué l’histoire de Chelsea à Munich... mais surtout, une phrase dans un vestiaire a fait taire les armes en Côte d'Ivoire.\nDans cette vidéo, je raconte comment Didier Drogba est passé de Didi à Abidjan au héros des grands soirs, et comment son message de 2005 puis le match à Bouaké en 2007 o...",
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -118,13 +141,53 @@ class _VideoScreenState extends State<VideoScreen> {
 
     return Stack(
       children: [
-        const Scaffold(
-          body: Center(
-            child: Text(
-              "Contenu principal de l'application",
-              textAlign: TextAlign.center,
-            ),
-          ),
+        Scaffold(
+          body: _isMinimized
+              ? const Center(
+                  child: Text(
+                    "Contenu principal de l'application",
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : SafeArea(
+                  child: Column(
+                    children: [
+                      SizedBox(height: screenSize.height / 3),
+                      Expanded(
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: [
+                            VideoDetails(
+                              title:
+                                  "Le Footballeur Qui A Mis Fin À La Guerre Dans Son Pays",
+                              channelName: "@thibs-ytb",
+                              subscribers: "1,2 M d'abonnés",
+                              views: "56 k vues",
+                              timeAgo: "il y a 7 m.",
+                              onTitleTap: _showDescriptionBottomSheet,
+                            ),
+                            const RecommendationCard(
+                              title: " José Mourinho GRAND FAVORI au Real, la réponse CASH de Deschamps à Lloris | JT Foot Mercato ",
+                              channel: "Foot Mercato",
+                              views: "47 k vues",
+                              time: "il y a 8 h",
+                              duration: "10:03",
+                              thumbnailUrl: "",
+                            ),
+                            const RecommendationCard(
+                              title: "Pourquoi ce joueur est une légende ?",
+                              channel: "Football News",
+                              views: "1,2 M vues",
+                              time: "il y a 2 sem",
+                              duration: "12:45",
+                              thumbnailUrl: "",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
         ),
         AnimatedPositioned(
           curve: Curves.easeOutBack,
